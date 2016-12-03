@@ -79,6 +79,8 @@ void showConnectedRooms(int &currentRoom, int roomArray[][7]);
 bool isConnected(int targetRoom, int gameArray[], int roomArray[][7]);
 //PART 3 prototypes
 
+int moveRoom(int x, int gameArray[], int roomArray[][7]);
+
 int main()
 {
 	// these variables are passed throughout this program
@@ -376,9 +378,25 @@ bool isConnected(int targetRoom, int gameArray[], int roomArray[][7])
             return isConnected;
 }
 
-int moveRoom(int x, int gameArray[])
+int moveRoom(int x, int gameArray[], int roomArray[][7], int& currentRoom, int& haveGrail)
 {
-    if(isConnected(x, gameArray[]))
+    if(isConnected(x, gameArray, roomArray) == 1)
+    {
+        roomArray[currentRoom][PLAYER_INDEX] = 0;
+        currentRoom = x;
+        roomArray[currentRoom][4] = 1;
+
+    }
+    else
+    {
+        cout << "You cannot move to the specified room." << endl;
+    }
+
+    if(roomArray[currentRoom][GRAIL_INDEX] == 1)
+    {
+        haveGrail = 1;
+    }
+
 
 }
 
