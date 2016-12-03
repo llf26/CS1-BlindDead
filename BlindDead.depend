@@ -1,0 +1,10 @@
+# depslib dependency file v1.0
+1480213044 source:c:\users\larry\documents\ua classes\cs1\blinddead\main.cpp
+	<iostream>
+	<fstream>
+	<cstdlib>
+	<ctime>
+	<cctype>
+	<iomanip>
+	<limits>
+
