@@ -383,18 +383,30 @@ int moveRoom(int x, int gameArray[], int roomArray[][7], int& currentRoom, int& 
     if(isConnected(x, gameArray, roomArray) == 1)
     {
         roomArray[currentRoom][PLAYER_INDEX] = 0;
+
+        if((gameArray[HAVE_GRAIL_INDEX] == 0) && roomArray[currentRoom][GRAIL_INDEX] == 1)
+    {
+        haveGrail = 1;
+    }
+
+         if(gameArray[HAVE_GRAIL_INDEX] == 1)
+    {
+        roomArray[currentRoom][GRAIL_INDEX] = 0;
+
+    }
+
         currentRoom = x;
-        roomArray[currentRoom][4] = 1;
+
+        roomArray[currentRoom][PLAYER_INDEX] = 1;
+        roomArray[currentRoom][GRAIL_INDEX] = 1;
+
+        if((gameArray[HAVE_GRAIL_INDEX] == 1) && (currentRoom == 1))
+            winOrLose(1, gameArray);
 
     }
     else
     {
         cout << "You cannot move to the specified room." << endl;
-    }
-
-    if(roomArray[currentRoom][GRAIL_INDEX] == 1)
-    {
-        haveGrail = 1;
     }
 
 
