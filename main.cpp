@@ -79,7 +79,7 @@ void showConnectedRooms(int &currentRoom, int roomArray[][7]);
 bool isConnected(int targetRoom, int gameArray[], int roomArray[][7]);
 //PART 3 prototypes
 
-int moveRoom(int x, int gameArray[], int roomArray[][7]);
+void moveRoom(int x, int gameArray[], int roomArray[][7]);
 
 int main()
 {
@@ -378,7 +378,7 @@ bool isConnected(int targetRoom, int gameArray[], int roomArray[][7])
             return isConnected;
 }
 
-int moveRoom(int x, int gameArray[], int roomArray[][7], int& currentRoom, int& haveGrail)
+void moveRoom(int x, int gameArray[], int roomArray[][7], int& currentRoom, int& haveGrail)
 {
     if(isConnected(x, gameArray, roomArray) == 1)
     {
@@ -411,6 +411,8 @@ int moveRoom(int x, int gameArray[], int roomArray[][7], int& currentRoom, int& 
 
 
 }
+
+
 
 
 
