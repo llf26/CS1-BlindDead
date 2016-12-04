@@ -438,6 +438,26 @@ void shootRoom(int x, int gameArray[], int roomArray[][7], int& currentRoom)
 
 }
 
+/*
+void moveZombie(int roomArray[][7])
+{
+    int i = 0;
+    while(roomArray[i][ZOMBIE_INDEX] != 1)
+    {
+        if(roomArray[i][ZOMBIE_INDEX] == 1)
+        {
+            roomArray[i][ZOMBIE_INDEX] = 0;
+
+        }
+
+        i++;
+
+    }
+
+
+}
+*/
+
 
 
 
