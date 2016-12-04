@@ -81,6 +81,8 @@ bool isConnected(int targetRoom, int gameArray[], int roomArray[][7]);
 
 void moveRoom(int x, int gameArray[], int roomArray[][7]);
 
+void shootRoom(int x, int gameArray[], int roomArray[][7], int& currentRoom);
+
 int main()
 {
 	// these variables are passed throughout this program
@@ -380,6 +382,8 @@ bool isConnected(int targetRoom, int gameArray[], int roomArray[][7])
 
 void moveRoom(int x, int gameArray[], int roomArray[][7], int& currentRoom, int& haveGrail)
 {
+    cout << "Choose a room to move to that is connected to room " << currentRoom << ".\n";
+    cin >> x;
     if(isConnected(x, gameArray, roomArray) == 1)
     {
         roomArray[currentRoom][PLAYER_INDEX] = 0;
@@ -409,6 +413,28 @@ void moveRoom(int x, int gameArray[], int roomArray[][7], int& currentRoom, int&
         cout << "You cannot move to the specified room." << endl;
     }
 
+
+}
+
+void shootRoom(int x, int gameArray[], int roomArray[][7], int& currentRoom)
+{
+    cout << "Choose a room to shoot into that is connected to room " << currentRoom << ".\n";
+    cin >> x;
+
+    if(isConnected(x, gameArray, roomArray) == 1)
+    {
+     gameArray[NUM_BULLETS_INDEX]--;
+     if(checkZombie(x, roomArray) == 1)
+            roomArray[x][ZOMBIE_INDEX] == 0;
+     else
+     {
+         cout << "The zombie was not in the room, you missed!\n";
+     }
+    }
+    else
+     {
+         cout << "The room you selected is not connected to your current room.\n";
+     }
 
 }
 
