@@ -57,7 +57,7 @@ void readMaze(int roomArray[][7], int gameArray[5], int& numRooms);
 //return a random room
 int getRandomRoom(int gameArray[5], int& numRooms);
 //place the zombie
-void placeZombie(int roomArray[][7], int gameArray[5], int& numRooms);
+void placeZombie(int roomArray[][7], int gameArray[5], int& numRooms, int& zombieRoom);
 //place the grail
 void placeGrail(int roomArray[][7], int gameArray[5], int& numRooms);
 // the setup function
@@ -79,9 +79,11 @@ void showConnectedRooms(int &currentRoom, int roomArray[][7]);
 bool isConnected(int targetRoom, int gameArray[], int roomArray[][7]);
 //PART 3 prototypes
 
-void moveRoom(int x, int gameArray[], int roomArray[][7]);
+void moveRoom(int x, int gameArray[], int roomArray[][7], int& currentRoom, bool& haveGrail, int& zombieRoom);
 
-void shootRoom(int x, int gameArray[], int roomArray[][7], int& currentRoom);
+void shootRoom(int x, int gameArray[], int roomArray[][7], int& zombieRoom);
+
+void moveZombie(int roomArray[][7], int& zombieRoom);
 
 int main()
 {
@@ -133,10 +135,10 @@ void instructions()
 
 void printMemory(int gameArray[], int roomArray[][7], int& numRooms)
 {
-    cout << "Game Array: " << endl << "  [current][bullets][   rooms]" << endl << "  ";
+    cout << "Game Array: " << endl << "  [ current][ bullets][    rooms]" << endl << "  ";
     for(int i = 0; i  < 3; i++)
     {
-        cout << "[      " << gameArray[i] << "]";
+        cout << "[       " << gameArray[i] << "]";
     }
     cout << endl << endl;
 
@@ -191,6 +193,11 @@ bool menu(int &currentRoom, int &zombieRoom, int &numBullets, int &numRooms, boo
                 break;
         case 2: setup(currentRoom, zombieRoom, numBullets, numRooms, haveGrail, roomArray, gameArray);
                 printMemory(gameArray, roomArray, numRooms);
+                moveZombie(roomArray, zombieRoom);
+                printMemory(gameArray, roomArray, numRooms);
+                cout << zombieRoom << endl;
+
+
                 break;
         case 3: std::exit(0);
     }
@@ -230,10 +237,9 @@ int randRoom = rand() % numRooms + 1;
 return randRoom;
 }
 
-void placeZombie(int roomArray[][7], int gameArray[5], int& numRooms)
+void placeZombie(int roomArray[][7], int gameArray[5], int& numRooms, int& zombieRoom)
 {
 
-    int zombieRoom = 0;
     while(zombieRoom < (numRooms / 2 + 1))
     {
         zombieRoom = getRandomRoom(gameArray, numRooms);
@@ -256,33 +262,26 @@ void placeGrail(int roomArray[][7], int gameArray[5], int& numRooms)
 
 }
 
-void setup(int &currentRoom, int &zombieRoom, int &numBullets, int &numRooms, bool &haveGrail, int roomArray[][7], int gameArray[5])
+void setup(int &currentRoom, int &zombieRoom, int &numBullets, int &numRooms, bool &haveGrail, int roomArray[][7], int gameArray[])
 {
     srand(time(0));
 
-    currentRoom = 1;
+    readMaze(roomArray, gameArray, numRooms);
 
-    haveGrail = 0;
+    gameArray[0] = 1;
+
+    roomArray[0][4] = 1;
+
+    gameArray[1] = MAX_BULLETS;
 
     numBullets = MAX_BULLETS;
 
-    gameArray[0] = currentRoom;
 
-    gameArray[1] = numBullets;
-
-
-
-    readMaze(roomArray, gameArray, numRooms);
 
     gameArray[2] = numRooms;
 
-    placeZombie(roomArray, gameArray, numRooms);
+    placeZombie(roomArray, gameArray, numRooms, zombieRoom);
     placeGrail(roomArray, gameArray, numRooms);
-
-
-
-
-
 
 }
 
@@ -380,52 +379,69 @@ bool isConnected(int targetRoom, int gameArray[], int roomArray[][7])
             return isConnected;
 }
 
-void moveRoom(int x, int gameArray[], int roomArray[][7], int& currentRoom, int& haveGrail)
+void moveRoom(int x, int gameArray[], int roomArray[][7], int& currentRoom, bool& haveGrail, int& zombieRoom)
 {
-    cout << "Choose a room to move to that is connected to room " << currentRoom << ".\n";
-    cin >> x;
+
     if(isConnected(x, gameArray, roomArray) == 1)
     {
-        roomArray[currentRoom][PLAYER_INDEX] = 0;
+    roomArray[gameArray[CURRENT_ROOM_INDEX -1]][PLAYER_INDEX] = 1;
 
-        if((gameArray[HAVE_GRAIL_INDEX] == 0) && roomArray[currentRoom][GRAIL_INDEX] == 1)
+    roomArray[x - 1][PLAYER_INDEX] = 1;
+
+    gameArray[0] = x;
+
+
+    if(haveGrail == 1)
     {
+        for(int i = 0; i < gameArray[2]; i++)
+        {
+        roomArray[i][GRAIL_INDEX] = 0;
+        }
+        roomArray[x - 1][GRAIL_INDEX] = 1;
+
+
+    }
+
+        if(checkGrail(gameArray[0], roomArray))
+        {
         haveGrail = 1;
-    }
+        }
 
-         if(gameArray[HAVE_GRAIL_INDEX] == 1)
-    {
-        roomArray[currentRoom][GRAIL_INDEX] = 0;
-
-    }
-
-        currentRoom = x;
-
-        roomArray[currentRoom][PLAYER_INDEX] = 1;
-        roomArray[currentRoom][GRAIL_INDEX] = 1;
-
-        if((gameArray[HAVE_GRAIL_INDEX] == 1) && (currentRoom == 1))
+        if((gameArray[0] == 1) && (haveGrail == 1))
+        {
             winOrLose(1, gameArray);
+            exit(0);
+        }
+
+        if(gameArray[0] == zombieRoom)
+        {
+            winOrLose(0, gameArray);
+        }
+
+        cout << gameArray[0] << endl;
 
     }
+
     else
     {
-        cout << "You cannot move to the specified room." << endl;
+    cout << "The room you selected is not connected to you." << endl;
     }
-
 
 }
 
-void shootRoom(int x, int gameArray[], int roomArray[][7], int& currentRoom)
+void shootRoom(int x, int gameArray[], int roomArray[][7], int& zombieRoom)
 {
-    cout << "Choose a room to shoot into that is connected to room " << currentRoom << ".\n";
-    cin >> x;
+
 
     if(isConnected(x, gameArray, roomArray) == 1)
     {
-     gameArray[NUM_BULLETS_INDEX]--;
+     gameArray[1]--;
      if(checkZombie(x, roomArray) == 1)
-            roomArray[x][ZOMBIE_INDEX] == 0;
+     {
+            roomArray[x - 1][ZOMBIE_INDEX] = 0;
+            zombieRoom = 0;
+            cout << "You hit the zombie and fell to the floor! You feel a great sense of peace." << endl;
+     }
      else
      {
          cout << "The zombie was not in the room, you missed!\n";
@@ -438,25 +454,28 @@ void shootRoom(int x, int gameArray[], int roomArray[][7], int& currentRoom)
 
 }
 
-/*
-void moveZombie(int roomArray[][7])
+
+void moveZombie(int roomArray[][7], int& zombieRoom)
 {
-    int i = 0;
-    while(roomArray[i][ZOMBIE_INDEX] != 1)
+    if(zombieRoom)
     {
-        if(roomArray[i][ZOMBIE_INDEX] == 1)
+    int newRoom;
+
+    newRoom = rand() % 4;
+
+        if(roomArray[zombieRoom - 1][newRoom] != 0)
         {
-            roomArray[i][ZOMBIE_INDEX] = 0;
+        roomArray[zombieRoom - 1][ZOMBIE_INDEX] = 0;
 
+        roomArray[roomArray[zombieRoom - 1][newRoom] - 1][5] = 1;
+
+        zombieRoom = roomArray[zombieRoom - 1][newRoom];
         }
-
-        i++;
-
     }
 
 
 }
-*/
+
 
 
 
