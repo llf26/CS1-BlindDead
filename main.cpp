@@ -12,6 +12,8 @@
 #include<cctype>
 #include<iomanip>
 #include<limits>
+#include<string>
+
 using std::cout;
 using std::cin;
 using std::endl;
@@ -79,11 +81,19 @@ void showConnectedRooms(int &currentRoom, int roomArray[][7]);
 bool isConnected(int targetRoom, int gameArray[], int roomArray[][7]);
 //PART 3 prototypes
 
-void moveRoom(int x, int gameArray[], int roomArray[][7], int& currentRoom, bool& haveGrail, int& zombieRoom);
+void moveRoom(int x, int gameArray[], int roomArray[][7], bool& haveGrail, int& zombieRoom, int& currentRoom);
 
 void shootRoom(int x, int gameArray[], int roomArray[][7], int& zombieRoom);
 
 void moveZombie(int roomArray[][7], int& zombieRoom);
+
+bool validateSelection(std::string toValidate);
+
+void doSelection(std::string control, int gameArray[], int roomArray[][7], int& haveGrail, int& zombieRoom, int& numRooms, int& currentRoom);
+
+void checkRoom(int gameArray[], int roomArray[][7], bool& haveGrail, int& currentRoom, int& zombieRoom, int& numRooms);
+
+void running(int gameArray[], int roomArray[][7], bool& haveGrail, int& currentRoom, int& zombieRoom, int& numRooms);
 
 int main()
 {
@@ -95,12 +105,19 @@ int main()
        numBullets = 0,
        numRooms = 0;
 
+
 //       menuSelection = 0;
    bool haveGrail = false;
 
    //readMaze(roomArray, gameArray, numRooms);
    //getRandomRoom(gameArray, numRooms);
    //placeZombie(roomArray, gameArray, numRooms);
+
+   reset(currentRoom, zombieRoom, numBullets, numRooms, haveGrail);
+
+   menu(currentRoom, zombieRoom, numBullets, numRooms, haveGrail, gameArray, roomArray);
+
+        return 0;
 
 
 
@@ -192,10 +209,6 @@ bool menu(int &currentRoom, int &zombieRoom, int &numBullets, int &numRooms, boo
         case 1: instructions();
                 break;
         case 2: setup(currentRoom, zombieRoom, numBullets, numRooms, haveGrail, roomArray, gameArray);
-                printMemory(gameArray, roomArray, numRooms);
-                moveZombie(roomArray, zombieRoom);
-                printMemory(gameArray, roomArray, numRooms);
-                cout << zombieRoom << endl;
 
 
                 break;
@@ -271,6 +284,7 @@ void setup(int &currentRoom, int &zombieRoom, int &numBullets, int &numRooms, bo
     gameArray[0] = 1;
 
     roomArray[0][4] = 1;
+    currentRoom = 1;
 
     gameArray[1] = MAX_BULLETS;
 
@@ -282,6 +296,8 @@ void setup(int &currentRoom, int &zombieRoom, int &numBullets, int &numRooms, bo
 
     placeZombie(roomArray, gameArray, numRooms, zombieRoom);
     placeGrail(roomArray, gameArray, numRooms);
+
+    running(gameArray, roomArray, haveGrail, currentRoom, zombieRoom, numRooms);
 
 }
 
@@ -304,13 +320,13 @@ bool checkGrail (int i, int roomArray[][7])
 {
     if(roomArray[i-1][GRAIL_INDEX] == 1)
     {
-        cout << "||grail check: true||\n";
+       // cout << "||grail check: true||\n";
         return 1;
     }
 
     else
     {
-        cout << "||grail check: false||\n";
+       // cout << "||grail check: false||\n";
         return 0;
     }
 }
@@ -379,7 +395,7 @@ bool isConnected(int targetRoom, int gameArray[], int roomArray[][7])
             return isConnected;
 }
 
-void moveRoom(int x, int gameArray[], int roomArray[][7], int& currentRoom, bool& haveGrail, int& zombieRoom)
+void moveRoom(int x, int gameArray[], int roomArray[][7], bool& haveGrail, int& zombieRoom, int& currentRoom)
 {
 
     if(isConnected(x, gameArray, roomArray) == 1)
@@ -389,6 +405,7 @@ void moveRoom(int x, int gameArray[], int roomArray[][7], int& currentRoom, bool
     roomArray[x - 1][PLAYER_INDEX] = 1;
 
     gameArray[0] = x;
+    currentRoom = x;
 
 
     if(haveGrail == 1)
@@ -418,7 +435,7 @@ void moveRoom(int x, int gameArray[], int roomArray[][7], int& currentRoom, bool
             winOrLose(0, gameArray);
         }
 
-        cout << gameArray[0] << endl;
+
 
     }
 
@@ -474,6 +491,125 @@ void moveZombie(int roomArray[][7], int& zombieRoom)
     }
 
 
+}
+
+bool validateSelection(std::string toValidate)
+{
+    std::string first = toValidate.substr(0,1);
+    if(first.compare("Q") == 0)
+        return 1;
+
+    if(first.compare("D") == 0)
+        return 1;
+
+    if(first.compare("S") == 0)
+        return 1;
+
+    if(first.compare("M") == 0)
+        return 1;
+
+    else
+    return 0;
+
+}
+
+void doSelection(std::string control, int gameArray[], int roomArray[][7], bool& haveGrail, int& zombieRoom, int& numRooms, int& currentRoom)
+{
+    std::string first = control.substr(0,1);
+
+    int room;
+    bool doMoveZombie = 0;
+
+    if(first.compare("Q") == 0)
+    {
+        exit (0);
+    }
+
+    if(first.compare("D") == 0)
+    {
+        printMemory(gameArray, roomArray, numRooms);
+        doMoveZombie = 0;
+    }
+
+    if(first.compare("S") == 0)
+    {
+        cin >> room;
+        shootRoom(room, gameArray, roomArray, zombieRoom);
+        doMoveZombie = 1;
+    }
+
+    if(first.compare("M") == 0)
+    {
+       cin >> room;
+       moveRoom(room, gameArray, roomArray, haveGrail, zombieRoom, currentRoom);
+       doMoveZombie = 1;
+    }
+
+
+    if(doMoveZombie && (zombieRoom != 0))
+    {
+        moveZombie(roomArray, zombieRoom);
+        if(gameArray[0] == zombieRoom)
+        {
+            winOrLose(0, gameArray);
+
+        }
+    }
+
+
+}
+
+void waitForMove(int gameArray[], int roomArray[][7], bool& haveGrail, int& zombieRoom, int& numRooms, int& currentRoom)
+{
+    bool loopFlag = 0;
+
+    std::string toValidate;
+
+    do
+    {
+        cout << "Player menu:" << endl
+        << "Q: End the game" << endl
+        << "D: Print the game memory" << endl
+        << "S #: Shoot into the selected room" << endl
+        << "M #: Move to the selected room" << endl;
+
+        cin >> toValidate;
+        if(validateSelection(toValidate) == 1)
+        {
+            doSelection(toValidate, gameArray, roomArray, haveGrail, zombieRoom, numRooms, currentRoom);
+            loopFlag = 1;
+        }
+
+        else
+            cout << "That selection was invalid.";
+    }while(loopFlag == 0);
+
+}
+
+void checkRoom(int gameArray[], int roomArray[][7], bool& haveGrail, int& currentRoom, int& zombieRoom, int& numRooms)
+{
+    cout << endl << "Current room: " << gameArray[0] << endl
+    << "Bullets left: " << gameArray[1] << endl;
+
+    if(haveGrail)
+        cout << "You have the grail!" << endl;
+
+    if(checkNearZombie(gameArray[0], roomArray))
+        cout << "You hear a zombie snarl nearby..." << endl;
+
+    if(checkNearGrail(gameArray[0], roomArray))
+        cout << "You feel the grail's aura somewhere nearby..." << endl;
+
+    showConnectedRooms(currentRoom, roomArray);
+
+    waitForMove(gameArray, roomArray, haveGrail, zombieRoom, numRooms, currentRoom);
+
+}
+
+void running(int gameArray[], int roomArray[][7], bool& haveGrail, int& currentRoom, int& zombieRoom, int& numRooms)
+{
+    while(gameArray[0] != -1)
+        checkRoom(gameArray, roomArray, haveGrail, currentRoom, zombieRoom, numRooms);
 }
 
 
